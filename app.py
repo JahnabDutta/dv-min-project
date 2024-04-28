@@ -40,8 +40,21 @@ heatmap_offenders_victims_by_sex = heatmap_offenders_victims_by_sex.drop(columns
 
 
 def get_stacked_barplot():
-    crimes = ["Violent Crime","Motor Vehicle Theft","Robbery","Aggravated Assult","Rape (Legacy Definition)"]
+    crimes = ["Violent Crime","Rape (Legacy Definition)","Robbery","Aggravated Assult","Motor Vehicle Theft"]
     fig = go.Figure()
+
+    # Define a color map for the states
+    states_names = crimes_by_state['State'].unique()
+    # remove nan from states_names
+    states_names = states_names[~pd.isna(states_names)]
+    # make colour map for all the states
+    color_map = {}
+    for i in range(len(states_names)):
+        # make px color map
+        color_map[states_names[i]] = px.colors.qualitative.Plotly[i%len(px.colors.qualitative.Plotly)]
+
+    # Keep track of states that have already been added to the legend
+    added_states = set()
 
     for crime in crimes:
         # Sort by crime and select top 5
@@ -52,11 +65,14 @@ def get_stacked_barplot():
                 x=[top_states.loc[top_states['State'] == state, crime].values[0]],
                 name=state,
                 orientation='h',
-                width=0.5,
+                width=0.4,
+                marker_color=color_map[state] if state !="TEXAS" else "red",
+                showlegend=state not in added_states  # Only show in legend if state has not been added yet
             ))
+            added_states.add(state)  # Add state to added_states set
 
-    fig.update_layout(barmode='group',bargap=0.1)
-
+    #Change legend such that each state is only shown once
+    fig.update_layout(barmode='group',legend_title_text='States',legend_traceorder='reversed',bargroupgap=0.5)
     return fig
 
 app.layout = dbc.Container([
