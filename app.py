@@ -23,9 +23,14 @@ merged_officer_data['Officers_Per_Capita'] = merged_officer_data['Total Officers
 #crime trends
 crime_trends = pd.read_csv('data-dir/crime_trends.csv')
 
+#murder victims
+murder_victims = pd.read_csv('data-dir/murder_victims.csv')
 
 #arrests by crimes and ethnicity
 arrests_by_crime_ethnicity = pd.read_csv('data-dir/arrests_by_crime_ethnicity_T.csv')
+
+#murder offenders
+murder_offenders = pd.read_csv('data-dir/murder_offenders.csv')
 
 app.layout = dbc.Container([
     dbc.Row([
@@ -81,7 +86,34 @@ app.layout = dbc.Container([
             dcc.Graph(id='arrests_by_crime_ethnicity')
 
 
-        ])
+        ],width=4),
+        dbc.Col([
+            html.H1('Murder Victims Composition'),
+            dcc.RadioItems(
+            id='murder_victims_radiobox',
+            options=[
+                {'label': 'Ethnicity', 'value': 'ethnicity'},
+                {'label': 'Sex', 'value': 'sex'}
+            ],
+            value='ethnicity'
+            ),  
+            dcc.Graph(id='murder_victims')
+            
+        ],width=4),
+        dbc.Col([
+            html.H1('Murder Offenders Composition'),
+            dcc.RadioItems(
+            id='murder_offenders_radiobox',
+            options=[
+                {'label': 'Ethnicity', 'value': 'ethnicity'},
+                {'label': 'Sex', 'value': 'sex'},
+                {'label':'Age','value':'age'}
+            ],
+            value='ethnicity'
+            ),  
+            dcc.Graph(id='murder_offenders')
+            
+        ],width=4),
     ])
 ])
 
@@ -148,6 +180,43 @@ def update_radarplot(races):
     )
 
     return fig
+
+@app.callback(
+    Output('murder_victims','figure'),
+    Input('murder_victims_radiobox','value')
+)
+def update_victims_piechart(feature):
+    if feature == 'ethnicity':
+        fig = px.pie(murder_victims, values='Total', names='Race', title='Murder Victims by Race')
+    else:
+        df_sex = pd.DataFrame({'sex': ['male', 'female','unknown'], 'total': [murder_victims['Male'].sum(), murder_victims['Female'].sum(),murder_victims['Unkown'].sum()]})
+        fig = px.pie(df_sex, values='total', names='sex', title='Murder Victims by Sex')
+    return fig 
+
+
+@app.callback(
+    Output('murder_offenders','figure'),
+    Input('murder_offenders_radiobox','value')
+)
+def update_offenders_piechart(feature):
+
+    races = ['White','Black','Other','Unknown','Hispanic or latino']
+    sexes = ['Male','Female','Unknown Sex']
+    if feature=='ethnicity':
+        df_ethnicity= pd.DataFrame({
+            'ethnicity':races,'total':[murder_offenders[i].sum() for i in races]
+        })
+        fig=px.pie(df_ethnicity,values='total',names='ethnicity',title='Murder Offenders by Ethnicity')
+    elif feature=="sex":
+        df_sex = pd.DataFrame({
+            'sex':sexes, 'total':[murder_offenders[i].sum() for i in sexes]
+        })
+        fig=px.pie(df_sex,values='total',names='sex',title='Murder Offenders by Sex')
+    
+    else:
+        fig = px.pie(murder_offenders,values='Total',names='Age',title="Murder Offenders by Age")
+    return fig
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
