@@ -32,6 +32,13 @@ arrests_by_crime_ethnicity = pd.read_csv('data-dir/arrests_by_crime_ethnicity_T.
 #murder offenders
 murder_offenders = pd.read_csv('data-dir/murder_offenders.csv')
 
+#heatmap offenders victims
+heatmap_offenders_victims_by_race = pd.read_csv('data-dir/heatmap_offenders_victims_by_race.csv')
+heatmap_offenders_victims_by_sex = pd.read_csv('data/heatmap_offenders_victims_by_sex.csv')
+heatmap_offenders_victims_by_race = heatmap_offenders_victims_by_race.drop(columns=['Total'])
+heatmap_offenders_victims_by_sex = heatmap_offenders_victims_by_sex.drop(columns=['Total'])
+
+
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
@@ -114,6 +121,20 @@ app.layout = dbc.Container([
             dcc.Graph(id='murder_offenders')
             
         ],width=4),
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.H1("Heatmap of victims and offenders"),
+            dcc.RadioItems(
+            id='heatmap_victims_offenders_radiobox',
+            options=[
+                {'label': 'Ethnicity', 'value': 'ethnicity'},
+                {'label': 'Sex', 'value': 'sex'},
+            ],
+            value='ethnicity'
+            ), 
+            dcc.Graph(id='heatmap_victims_offenders') 
+        ],width=6)
     ])
 ])
 
@@ -217,7 +238,51 @@ def update_offenders_piechart(feature):
         fig = px.pie(murder_offenders,values='Total',names='Age',title="Murder Offenders by Age")
     return fig
 
+@app.callback(
+    Output('heatmap_victims_offenders', 'figure'),
+    Input('heatmap_victims_offenders_radiobox', 'value')
+)
+
+def update_heatmap(feature):
+    if feature == 'sex':
+
+        grouped = heatmap_offenders_victims_by_sex.groupby('Sex of victim').sum()
+        grouped = grouped.drop(columns=['Unnamed: 0'])
+        fig = go.Figure(data=go.Heatmap(
+        z=grouped.values,
+        x=grouped.columns,
+        y=grouped.index,
+        hoverongaps = False))
+                
+        # Add labels
+        fig.update_layout(
+            title='Sex of Victims vs. Sex of Offenders',
+            xaxis=dict(title='Sex of Offenders'),
+            yaxis=dict(title='Sex of Victims')
+        )
+    else:
+        
+        grouped = heatmap_offenders_victims_by_race.groupby('Race of victim').sum()
+        grouped = grouped.drop(columns=['Unnamed: 0'])
+        fig = go.Figure(data=go.Heatmap(
+        z=grouped.values,
+        x=grouped.columns,
+        y=grouped.index,
+        hoverongaps = False))
+                
+        # Add labels
+        fig.update_layout(
+            title='Ethnicity of Victims vs. Ethnicity of Offenders',
+            xaxis=dict(title='Ethnicity of Offenders'),
+            yaxis=dict(title='Ethnicity of Victims')
+        )
+
+    return fig
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    
+
 
