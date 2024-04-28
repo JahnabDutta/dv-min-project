@@ -174,7 +174,26 @@ app.layout = dbc.Container([
         dbc.Col([
             html.H1("Stacked barplot of highest crimes"),
             dcc.Graph(figure=get_stacked_barplot())
-        ])
+        ]),
+        dbc.Col([
+            html.H1("Distribution of crimes over time"),
+            dcc.Checklist(
+                id='crime_ditribution_checklist',
+                options=[
+                    {'label': 'Violent Crime', 'value': 'Violent Crime'},
+                    {'label': 'Murder and Manslaughter', 'value':'Murder and Manslaughter'},
+                    {'label':'Rape','value':'Rape'},
+                    {'label':'Aggrevated Assault','value':'Aggrevated Assult'},
+                    {'label':'Robbery','value':'Robbery'},
+                    {'label':'Property Crimes','value':'Property Crime'}
+                ],
+                value=['Violent Crime']
+
+            ),
+            dcc.Graph(id='crime_distribution')
+
+        ],width=6)
+
     ])
 ])
 
@@ -317,6 +336,22 @@ def update_heatmap(feature):
             yaxis=dict(title='Ethnicity of Victims')
         )
 
+    return fig
+
+
+@app.callback(
+    Output('crime_distribution', 'figure'),
+    Input('crime_ditribution_checklist', 'value')
+)
+
+def update_crime_distribution(crime_types):
+    fig = go.Figure()
+    for crime in crime_types:
+        fig.add_trace(go.Box(y=crime_trends[crime], name=crime))
+        # add the value of crime for 2016 on the boxplot
+        fig.add_trace(go.Scatter(x=[crime], y=[crime_trends.loc[crime_trends['Year'] == 2016, crime].values[0]],
+                                 mode='markers', name=f'{crime} in 2016', marker=dict(size=20)))
+    fig.update_layout(title='Boxplot of Crimes over Time')
     return fig
 
 
