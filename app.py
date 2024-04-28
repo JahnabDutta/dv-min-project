@@ -39,6 +39,26 @@ heatmap_offenders_victims_by_race = heatmap_offenders_victims_by_race.drop(colum
 heatmap_offenders_victims_by_sex = heatmap_offenders_victims_by_sex.drop(columns=['Total'])
 
 
+def get_stacked_barplot():
+    crimes = ["Violent Crime","Motor Vehicle Theft","Robbery","Aggravated Assult","Rape (Legacy Definition)"]
+    fig = go.Figure()
+
+    for crime in crimes:
+        # Sort by crime and select top 5
+        top_states = crimes_by_state.sort_values(by=crime, ascending=False).head(5)
+        for state in top_states['State']:
+            fig.add_trace(go.Bar(
+                y=[crime],
+                x=[top_states.loc[top_states['State'] == state, crime].values[0]],
+                name=state,
+                orientation='h',
+                width=0.5,
+            ))
+
+    fig.update_layout(barmode='group',bargap=0.1)
+
+    return fig
+
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
@@ -74,7 +94,7 @@ app.layout = dbc.Container([
             dcc.Graph(id='crime_trends')
         ],
         width=6
-        )
+        ),
     ]),
     dbc.Row([
         dbc.Col([
@@ -134,7 +154,11 @@ app.layout = dbc.Container([
             value='ethnicity'
             ), 
             dcc.Graph(id='heatmap_victims_offenders') 
-        ],width=6)
+        ],width=6),
+        dbc.Col([
+            html.H1("Stacked barplot of highest crimes"),
+            dcc.Graph(figure=get_stacked_barplot())
+        ])
     ])
 ])
 
