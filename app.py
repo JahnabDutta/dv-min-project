@@ -32,6 +32,49 @@ arrests_by_crime_ethnicity = pd.read_csv('data-dir/arrests_by_crime_ethnicity_T.
 #murder offenders
 murder_offenders = pd.read_csv('data-dir/murder_offenders.csv')
 
+#heatmap offenders victims
+heatmap_offenders_victims_by_race = pd.read_csv('data-dir/heatmap_offenders_victims_by_race.csv')
+heatmap_offenders_victims_by_sex = pd.read_csv('data/heatmap_offenders_victims_by_sex.csv')
+heatmap_offenders_victims_by_race = heatmap_offenders_victims_by_race.drop(columns=['Total'])
+heatmap_offenders_victims_by_sex = heatmap_offenders_victims_by_sex.drop(columns=['Total'])
+
+
+def get_stacked_barplot():
+    crimes = ["Violent Crime","Rape (Legacy Definition)","Robbery","Aggravated Assult","Motor Vehicle Theft"]
+    fig = go.Figure()
+
+    # Define a color map for the states
+    states_names = crimes_by_state['State'].unique()
+    # remove nan from states_names
+    states_names = states_names[~pd.isna(states_names)]
+    # make colour map for all the states
+    color_map = {}
+    for i in range(len(states_names)):
+        # make px color map
+        color_map[states_names[i]] = px.colors.qualitative.Plotly[i%len(px.colors.qualitative.Plotly)]
+
+    # Keep track of states that have already been added to the legend
+    added_states = set()
+
+    for crime in crimes:
+        # Sort by crime and select top 5
+        top_states = crimes_by_state.sort_values(by=crime, ascending=False).head(5)
+        for state in top_states['State']:
+            fig.add_trace(go.Bar(
+                y=[crime],
+                x=[top_states.loc[top_states['State'] == state, crime].values[0]],
+                name=state,
+                orientation='h',
+                width=0.4,
+                marker_color=color_map[state] if state !="TEXAS" else "red",
+                showlegend=state not in added_states  # Only show in legend if state has not been added yet
+            ))
+            added_states.add(state)  # Add state to added_states set
+
+    #Change legend such that each state is only shown once
+    fig.update_layout(barmode='group',legend_title_text='States',legend_traceorder='reversed',bargroupgap=0.5)
+    return fig
+
 app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
@@ -67,7 +110,7 @@ app.layout = dbc.Container([
             dcc.Graph(id='crime_trends')
         ],
         width=6
-        )
+        ),
     ]),
     dbc.Row([
         dbc.Col([
@@ -114,6 +157,43 @@ app.layout = dbc.Container([
             dcc.Graph(id='murder_offenders')
             
         ],width=4),
+    ]),
+    dbc.Row([
+        dbc.Col([
+            html.H1("Heatmap of victims and offenders"),
+            dcc.RadioItems(
+            id='heatmap_victims_offenders_radiobox',
+            options=[
+                {'label': 'Ethnicity', 'value': 'ethnicity'},
+                {'label': 'Sex', 'value': 'sex'},
+            ],
+            value='ethnicity'
+            ), 
+            dcc.Graph(id='heatmap_victims_offenders') 
+        ],width=6),
+        dbc.Col([
+            html.H1("Stacked barplot of highest crimes"),
+            dcc.Graph(figure=get_stacked_barplot())
+        ]),
+        dbc.Col([
+            html.H1("Distribution of crimes over time"),
+            dcc.Checklist(
+                id='crime_ditribution_checklist',
+                options=[
+                    {'label': 'Violent Crime', 'value': 'Violent Crime'},
+                    {'label': 'Murder and Manslaughter', 'value':'Murder and Manslaughter'},
+                    {'label':'Rape','value':'Rape'},
+                    {'label':'Aggrevated Assault','value':'Aggrevated Assult'},
+                    {'label':'Robbery','value':'Robbery'},
+                    {'label':'Property Crimes','value':'Property Crime'}
+                ],
+                value=['Violent Crime']
+
+            ),
+            dcc.Graph(id='crime_distribution')
+
+        ],width=6)
+
     ])
 ])
 
@@ -217,7 +297,67 @@ def update_offenders_piechart(feature):
         fig = px.pie(murder_offenders,values='Total',names='Age',title="Murder Offenders by Age")
     return fig
 
+@app.callback(
+    Output('heatmap_victims_offenders', 'figure'),
+    Input('heatmap_victims_offenders_radiobox', 'value')
+)
+
+def update_heatmap(feature):
+    if feature == 'sex':
+
+        grouped = heatmap_offenders_victims_by_sex.groupby('Sex of victim').sum()
+        grouped = grouped.drop(columns=['Unnamed: 0'])
+        fig = go.Figure(data=go.Heatmap(
+        z=grouped.values,
+        x=grouped.columns,
+        y=grouped.index,
+        hoverongaps = False))
+                
+        # Add labels
+        fig.update_layout(
+            title='Sex of Victims vs. Sex of Offenders',
+            xaxis=dict(title='Sex of Offenders'),
+            yaxis=dict(title='Sex of Victims')
+        )
+    else:
+        
+        grouped = heatmap_offenders_victims_by_race.groupby('Race of victim').sum()
+        grouped = grouped.drop(columns=['Unnamed: 0'])
+        fig = go.Figure(data=go.Heatmap(
+        z=grouped.values,
+        x=grouped.columns,
+        y=grouped.index,
+        hoverongaps = False))
+                
+        # Add labels
+        fig.update_layout(
+            title='Ethnicity of Victims vs. Ethnicity of Offenders',
+            xaxis=dict(title='Ethnicity of Offenders'),
+            yaxis=dict(title='Ethnicity of Victims')
+        )
+
+    return fig
+
+
+@app.callback(
+    Output('crime_distribution', 'figure'),
+    Input('crime_ditribution_checklist', 'value')
+)
+
+def update_crime_distribution(crime_types):
+    fig = go.Figure()
+    for crime in crime_types:
+        fig.add_trace(go.Box(y=crime_trends[crime], name=crime))
+        # add the value of crime for 2016 on the boxplot
+        fig.add_trace(go.Scatter(x=[crime], y=[crime_trends.loc[crime_trends['Year'] == 2016, crime].values[0]],
+                                 mode='markers', name=f'{crime} in 2016', marker=dict(size=20)))
+    fig.update_layout(title='Boxplot of Crimes over Time')
+    return fig
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    
+
 

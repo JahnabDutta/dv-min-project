@@ -1,0 +1,4 @@
+most harmful weapon = handgun 7,105 homicides
+state with most crimes = California 1,861,269
+crime type with highest rate = property crime 7,993,631
+state with most number of officers = California 78,062
