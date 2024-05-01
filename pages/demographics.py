@@ -2,7 +2,7 @@ import dash_bootstrap_components as dbc
 import dash
 from dash import dcc, html, callback
 import plotly.graph_objects as go
-
+import seaborn as sns
 
 import plotly.express as px
 import pandas as pd
@@ -34,8 +34,8 @@ layout = html.Div([
     # Navbar(),
     dbc.Row([
         dbc.Col([
-            html.P('This figure shows crime data by state in the US.'),
-            html.P('Hover over the map to see the crime rate per capita for each state.'),
+            html.P('This figure shows crime data by state in the US.', style={'color': 'white'}),
+            html.P('Hover over the map to see the crime rate per capita for each state.', style={'color': 'white'}),
             # html.P('Hover over the map to see the crime rate per capita.'),
             html.Div(
                 [dcc.Dropdown(
@@ -76,7 +76,7 @@ layout = html.Div([
 
         dbc.Col([
             dbc.Col([
-                html.P('Different types of crimes in the US along with their trends:'),
+                html.P('Different types of crimes in the US along with their trends:', style={'color': 'white'}),
                 dcc.Dropdown(
                     options=['Violent Crime', 'Murder and Manslaughter', 'Rape', 'Aggravated Assault', 'Robbery', 'Property Crime', 'Burglary', 'Larceny and Theft', 'Motor Vehicle Theft'],
                     value=['Violent Crime', 'Robbery', 'Property Crime'],
@@ -139,7 +139,7 @@ layout = html.Div([
         #     #     ], style={'width': '100%', 'overflow': 'hidden', 'border': '2px solid red'})   # Container for the second graph
         #     # ])
         # ], width=6, style={'display': 'flex', 'flex-direction': 'column', 'maxHeight': '80vh'})
-    ], style={'--bs-gutter-x': '0px', 'height': '100%', 'padding': '20px'})
+    ], style={'--bs-gutter-x': '0px', 'height': '100%', 'padding': '20px','overflow': 'hidden'})
 ], style={'height': '92vh', 'backgroundImage': 'url(\'assets/bg/w15.jpg\')', 'backgroundPosition': "50% 50%", 'backgroundSize': 'cover'})
 
 @callback(
@@ -152,11 +152,11 @@ def update_map(dataset):
     if dataset == 'officers':
         fig = px.choropleth(merged_officer_data, geojson=merged_officer_data.geometry, locations=merged_officer_data.index,
                             color='Officers_Per_Capita', hover_name='State_Name',
-                            color_continuous_scale='OrRd', projection='mercator').update_layout(title="Officers per Capita by State", title_x=0.5, title_y=0.95)
+                            color_continuous_scale='Blues', projection='mercator').update_layout(title="Officers per Capita by State", title_x=0.5, title_y=0.95)
     else:
         fig = px.choropleth(merged_crime_data, geojson=merged_crime_data.geometry, locations=merged_crime_data.index,
                             color='Crime_Rate_Per_Capita', hover_name='State_Name',
-                            color_continuous_scale='OrRd', projection='mercator').update_layout(title="Crime Rate per Capita by State", title_x=0.5, title_y=0.95)
+                            color_continuous_scale='Blues', projection='mercator').update_layout(title="Crime Rate per Capita by State", title_x=0.5, title_y=0.95)
     
     # Update geos layout to show only specific countries
     fig.update_geos(
@@ -198,26 +198,18 @@ def update_trends(crime_types, per_capita_checked):
     df = crime_trends.copy()
     y_label = 'Incidents'
     
-    # Divide the selected crime types' values by the 'Population' column
     if per_capita_checked:
         for crime_type in crime_types:
             df[crime_type] /= df['Population']
         y_label = 'Incidents per Capita'
     
-    # Make a line chart of the crime trends over time
-    fig = px.line(df, x='Year', y=crime_types, markers=True)
-    # fig.update_layout(title='Crime Trends in the US')
+# Make a line chart of the crime trends over time
+    fig = px.line(df, x='Year', y=crime_types, markers=True, color_discrete_sequence=px.colors.qualitative.Prism)
 
-    # temp = pd.DataFrame({
-    #     'Year': crime_trends['Year'],
-    #     incidents
-    # })
 
-    # Update y-axis label
     fig.update_yaxes(title_text=y_label)
     fig.update_xaxes(title_text='Year')
 
-    # Update layout
     fig.update_layout(title='Crime Trends in the US', legend_title_text='Crime Type')
     fig.update_layout(margin=dict(t=40, b=0))
     fig.update_traces(marker=dict(size=4))
@@ -231,12 +223,13 @@ def update_trends(crime_types, per_capita_checked):
 
 def update_crime_distribution(crime_types):
     fig = go.Figure()
-    for crime in crime_types:
-        fig.add_trace(go.Box(y=crime_trends[crime], name=crime))
+    color_sequence = px.colors.qualitative.Prism
+    for i, crime in enumerate(crime_types):
+        color = color_sequence[i % len(color_sequence)]
+        fig.add_trace(go.Box(y=crime_trends[crime], name=crime, marker_color=color))
         # add the value of crime for 2016 on the boxplot
         fig.add_trace(go.Scatter(x=[crime], y=[crime_trends.loc[crime_trends['Year'] == 2016, crime].values[0]],
-                                 mode='markers', name=f'{crime} in 2016', marker=dict(size=5)))
-    fig.update_layout(title='Boxplot of Crimes over Time')
+                                 mode='markers', name=f'{crime} in 2016', marker=dict(size=5, color=color)))
     fig.update_yaxes(title_text='Incidents')
     fig.update_layout(margin=dict(t=40, b=0))
     return fig

@@ -12,7 +12,7 @@ def Navbar():
             dbc.NavItem(dbc.NavLink(page["name"], href=page["relative_path"])) for page in dash.page_registry.values()
         ],
         brand="CSL4050 Mini Project",
-        color="#0a2351",
+        color="#034694",
         dark=True,
         style={
             'fontFamily': 'Roboto',

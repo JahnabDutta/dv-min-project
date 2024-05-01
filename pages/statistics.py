@@ -41,7 +41,7 @@ def get_stacked_barplot():
     color_map = {}
     for i in range(len(states_names)):
         # make px color map
-        color_map[states_names[i]] = px.colors.qualitative.Plotly[i%len(px.colors.qualitative.Plotly)]
+        color_map[states_names[i]] = px.colors.qualitative.Prism[i%len(px.colors.qualitative.Prism)]
 
     # Keep track of states that have already been added to the legend
     added_states = set()
@@ -56,7 +56,7 @@ def get_stacked_barplot():
                 name=state[0] + state[1:].lower(),
                 orientation='h',
                 width=0.4,
-                marker_color=color_map[state] if state !="TEXAS" else "red",
+                marker_color=color_map[state] if state != "CALIFORNIA" else "#94346e",
                 showlegend=state not in added_states  # Only show in legend if state has not been added yet
             ))
             added_states.add(state)  # Add state to added_states set
@@ -161,6 +161,7 @@ layout = html.Div([
 def update_radarplot(races):
     cols = ['Murder and Manslaughter','Rape','Robbery','Aggravated Assault','Burglary','Larceny-theft']
     fig = go.Figure()
+    color_sequence = px.colors.qualitative.Prism
     arrests_by_crime_ethnicity[cols] = (arrests_by_crime_ethnicity[cols] - arrests_by_crime_ethnicity[cols].min()) / (arrests_by_crime_ethnicity[cols].max() - arrests_by_crime_ethnicity[cols].min())
     for i in range(len(races)):
         df_temp = arrests_by_crime_ethnicity[arrests_by_crime_ethnicity['Type of crime']==races[i]]
@@ -174,7 +175,8 @@ def update_radarplot(races):
             r= df_temp.values.reshape(1,-1)[0],
             theta= cols,
             fill='toself',
-            name=l_name
+            name=l_name,
+            line_color=color_sequence[i % len(color_sequence)]  # Assign color from Prism color sequence
         ))
     fig.update_layout(
         polar=dict(
@@ -183,7 +185,9 @@ def update_radarplot(races):
                 range=[0, 1]
             )),
         showlegend=True,
-        title='<b>Arrests by Crime and Ethnicity</b>'
+        title='<b>Arrests by Crime and Ethnicity</b>', 
+    #     width=350,
+    # height=150,
     )
     fig.update_layout(margin=dict(l=0, r=50, t=45, b=30))
 
@@ -197,10 +201,10 @@ def update_radarplot(races):
 def update_victims_piechart(type, grouped_by):
     if type == 'victims':
         if grouped_by == 'ethnicity':
-            fig = px.pie(murder_victims, values='Total', names='Race', title='<b>Murder Victims by Race</b>')
+            fig = px.pie(murder_victims, values='Total', names='Race', title='<b>Murder Victims by Race</b>', color_discrete_sequence=px.colors.qualitative.Prism)
         else:
             df_sex = pd.DataFrame({'sex': ['male', 'female','unknown'], 'total': [murder_victims['Male'].sum(), murder_victims['Female'].sum(),murder_victims['Unkown'].sum()]})
-            fig = px.pie(df_sex, values='total', names='sex', title='<b>Murder Victims by Sex</b>')
+            fig = px.pie(df_sex, values='total', names='sex', title='<b>Murder Victims by Sex</b>', color_discrete_sequence=px.colors.qualitative.Prism)
         fig.update_layout(margin=dict(l=20, r=0, t=40, b=10))
         return fig 
     else:
@@ -210,15 +214,15 @@ def update_victims_piechart(type, grouped_by):
             df_ethnicity= pd.DataFrame({
                 'ethnicity':races,'total':[murder_offenders[i].sum() for i in races]
             })
-            fig=px.pie(df_ethnicity,values='total',names='ethnicity',title='<b>Murder Offenders by Ethnicity</b>')
+            fig=px.pie(df_ethnicity,values='total',names='ethnicity',title='<b>Murder Offenders by Ethnicity</b>', color_discrete_sequence=px.colors.qualitative.Prism)
         elif grouped_by=="sex":
             df_sex = pd.DataFrame({
                 'sex':sexes, 'total':[murder_offenders[i].sum() for i in sexes]
             })
-            fig=px.pie(df_sex,values='total',names='sex',title='<b>Murder Offenders by Sex</b>')
+            fig=px.pie(df_sex,values='total',names='sex',title='<b>Murder Offenders by Sex</b>', color_discrete_sequence=px.colors.qualitative.Prism)
         
         else:
-            fig = px.pie(murder_offenders,values='Total',names='Age',title="<b>Murder Offenders by Age</b>")
+            fig = px.pie(murder_offenders,values='Total',names='Age',title="<b>Murder Offenders by Age</b>", color_discrete_sequence=px.colors.qualitative.Prism)
         fig.update_layout(margin=dict(l=20, r=0, t=40, b=10))
         return fig
 
@@ -263,7 +267,8 @@ def update_heatmap(feature):
         z=grouped.values,
         x=grouped.columns,
         y=grouped.index,
-        hoverongaps = False))
+        hoverongaps = False,
+        colorscale='Blues'))
                 
         # Add labels
         fig.update_layout(
@@ -280,14 +285,19 @@ def update_heatmap(feature):
         x=grouped.columns,
         y=grouped.index,
         hoverongaps = False,
-        colorbar=dict(thickness=10)))
+        colorscale='Blues',
+      ))
                 
         # Add labels
-        fig.update_layout(
-            title='<b>Victims\' vs. Offenders\' Ethnicity</b>',
-            xaxis=dict(title='Ethnicity of Offenders'),
-            yaxis=dict(title='Ethnicity of Victims')
-        )
+    fig.update_layout(
+    title='<b>Victims\' vs. Offenders\' Ethnicity</b>',
+    xaxis=dict(title='Ethnicity of Offenders', titlefont=dict(size=10)),
+    yaxis=dict(title='Ethnicity of Victims', titlefont=dict(size=10)),
+    legend=dict(font=dict(size=10)),
+    autosize=False,
+    width=400,
+    height=250,
+    )
 
         
     fig.update_layout(margin=dict(l=0, r=40, t=50, b=0))
