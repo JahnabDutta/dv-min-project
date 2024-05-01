@@ -81,7 +81,7 @@ layout = html.Div([
                                 placeholder="Choose Ethnicity"
                             ),
                         ], style={'display': 'flex', 'flexDirection': 'column', 'height': '100%'})
-                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)'}),
+                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)'}),
                 ], style={'width': '80%', 'height': '50%'}),
 
                 dbc.Row([
@@ -105,7 +105,7 @@ layout = html.Div([
                                 ], style={'margin-left': '20px'}),
                             ], style={'width': '25%', 'display': 'flex'})
                         ], style={'display': 'flex', 'justifyContent': 'space-between', 'height': '100%'}),
-                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)'})
+                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)'})
                 ], style={'width': '80%', 'height': '50%'}),
                 
             ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '30px', 'justifyContent': 'center', 'alignItems': 'end', 'width': '40%', 'height': '80vh'}),
@@ -141,7 +141,7 @@ layout = html.Div([
                                 ], style={'width': '100%'})
                             ], style={'display': 'flex', 'flexDirection': 'column', 'width':'30%', 'justifyContent': 'start', 'alignItems': 'start', 'gap': '20px', 'padding-left': '20px', 'padding-right': '10px'})
                         ], style={'display': 'flex', 'height': '100%'})
-                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)'}),
+                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)'}),
                 ], style={'width': '80%', 'height': '50%'}),
                 
                 dbc.Row([
@@ -149,10 +149,10 @@ layout = html.Div([
                         dbc.CardBody([
                             dcc.Graph(figure=get_stacked_barplot(), style={'width': '100%', 'height': '100%'})
                         ])
-                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)'})
+                    ], style={'height': '100%', 'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)'})
                 ], style={'width': '80%', 'height': '50%'}),
             ], style={'display': 'flex', 'flexDirection': 'column', 'gap': '30px', 'justifyContent': 'center', 'alignItems': 'start', 'width': '40%', 'height': '80vh'})
-        ], style={'display': 'flex', 'padding': '30px', 'gap': '50px', 'width': '100%', 'height': '100%'})
+        ], style={'display': 'flex', 'padding': '30px', 'gap': '50px', 'width': '100%', 'height': '92vh', 'backgroundImage': 'url(\'assets/bg/w15.jpg\')', 'backgroundPosition': "50% 50%", 'backgroundSize': 'cover'})
 
 @callback(
     Output('arrests_by_crime_ethnicity', 'figure'),

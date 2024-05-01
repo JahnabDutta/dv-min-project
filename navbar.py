@@ -11,12 +11,13 @@ def Navbar():
         children=[
             dbc.NavItem(dbc.NavLink(page["name"], href=page["relative_path"])) for page in dash.page_registry.values()
         ],
-        brand="US Crime Data Dashboard",
-        color="#000435",
+        brand="CSL4050 Mini Project",
+        color="#0a2351",
         dark=True,
         style={
             'fontFamily': 'Roboto',
             'fontWeight': '400',
+            'height': '8vh'
         },
         brand_style={
             'fontFamily': 'Roboto',

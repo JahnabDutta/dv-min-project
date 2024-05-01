@@ -71,7 +71,7 @@ layout = html.Div([
                 dbc.CardBody([
                     dcc.Graph(id='crime-map')
                 ])
-            ], style={'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)'})
+            ], style={'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)'})
         ], width=6, style={'padding': '30px'}),
 
         dbc.Col([
@@ -98,12 +98,12 @@ layout = html.Div([
                         
                         dcc.Graph(id='crime_trends', style={'height': '100%'})
                     ])
-                ], style={'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)', 'height': '50%', 'margin-bottom':'10px', 'padding-left':'10px'}),
+                ], style={'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)', 'height': '50%', 'margin-bottom':'10px', 'padding-left':'10px'}),
                 dbc.Card([
                     dbc.CardBody([
                         dcc.Graph(id='crime_distribution', style={'height': '100%'})
                     ])
-                ], style={'box-shadow': '5px 5px 5px 0px rgba(0,0,0,0.5)', 'height': '50%'})
+                ], style={'box-shadow': '5px 5px 5px 0px rgba(255,255,255,0.25)', 'height': '50%'})
                 # html.Div([
                 #     dcc.Graph(id='crime_trends', style={'height': '100%'})
                 # ], style={'height': '50%'}),
@@ -140,7 +140,7 @@ layout = html.Div([
         #     # ])
         # ], width=6, style={'display': 'flex', 'flex-direction': 'column', 'maxHeight': '80vh'})
     ], style={'--bs-gutter-x': '0px', 'height': '100%', 'padding': '20px'})
-], style={'height': '90vh'})
+], style={'height': '92vh', 'backgroundImage': 'url(\'assets/bg/w15.jpg\')', 'backgroundPosition': "50% 50%", 'backgroundSize': 'cover'})
 
 @callback(
     Output('crime-map', 'figure'),
