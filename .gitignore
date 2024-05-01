@@ -1,3 +1,4 @@
 data
 venv
 .env
+pages/__pycache__
