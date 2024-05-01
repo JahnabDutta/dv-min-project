@@ -33,15 +33,17 @@ def get_stacked_barplot():
     crimes = ["Violent Crime","Rape (Legacy Definition)","Robbery","Aggravated Assult","Motor Vehicle Theft"]
     fig = go.Figure()
 
-    # Define a color map for the states
-    states_names = crimes_by_state['State'].unique()
-    # remove nan from states_names
-    states_names = states_names[~pd.isna(states_names)]
-    # make colour map for all the states
+    # Identify the states that will be visible in the graph
+    visible_states = set()
+    for crime in crimes:
+        top_states = crimes_by_state.sort_values(by=crime, ascending=False).head(5)
+        visible_states.update(top_states['State'])
+
+    # Define a color map for the visible states
+    visible_states = list(visible_states)
     color_map = {}
-    for i in range(len(states_names)):
-        # make px color map
-        color_map[states_names[i]] = px.colors.qualitative.Prism[i%len(px.colors.qualitative.Prism)]
+    for i in range(len(visible_states)):
+        color_map[visible_states[i]] = px.colors.qualitative.Prism[i%len(px.colors.qualitative.Prism)]
 
     # Keep track of states that have already been added to the legend
     added_states = set()
@@ -56,7 +58,7 @@ def get_stacked_barplot():
                 name=state[0] + state[1:].lower(),
                 orientation='h',
                 width=0.4,
-                marker_color=color_map[state] if state != "CALIFORNIA" else "#94346e",
+                marker_color=color_map[state],
                 showlegend=state not in added_states  # Only show in legend if state has not been added yet
             ))
             added_states.add(state)  # Add state to added_states set
