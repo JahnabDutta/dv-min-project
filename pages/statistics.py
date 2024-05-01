@@ -272,9 +272,13 @@ def update_heatmap(feature):
                 
         # Add labels
         fig.update_layout(
-            title='<b>Victims\' vs. Offenders\' Sex</b>',
-            xaxis=dict(title='Sex of Offenders'),
-            yaxis=dict(title='Sex of Victims')
+        title='<b>Victims\' vs. Offenders\' Sex</b>',
+        xaxis=dict(title='Sex of Offenders', titlefont=dict(size=10)),
+        yaxis=dict(title='Sex of Victims', titlefont=dict(size=10)),
+        legend=dict(font=dict(size=10)),
+        autosize=False,
+        width=400,
+        height=250,
         )
     else:
         
@@ -289,15 +293,15 @@ def update_heatmap(feature):
       ))
                 
         # Add labels
-    fig.update_layout(
-    title='<b>Victims\' vs. Offenders\' Ethnicity</b>',
-    xaxis=dict(title='Ethnicity of Offenders', titlefont=dict(size=10)),
-    yaxis=dict(title='Ethnicity of Victims', titlefont=dict(size=10)),
-    legend=dict(font=dict(size=10)),
-    autosize=False,
-    width=400,
-    height=250,
-    )
+        fig.update_layout(
+        title='<b>Victims\' vs. Offenders\' Ethnicity</b>',
+        xaxis=dict(title='Ethnicity of Offenders', titlefont=dict(size=10)),
+        yaxis=dict(title='Ethnicity of Victims', titlefont=dict(size=10)),
+        legend=dict(font=dict(size=10)),
+        autosize=False,
+        width=400,
+        height=250,
+        )
 
         
     fig.update_layout(margin=dict(l=0, r=40, t=50, b=0))
